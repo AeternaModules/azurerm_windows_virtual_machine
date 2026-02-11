@@ -124,9 +124,12 @@ resource "azurerm_windows_virtual_machine" "windows_virtual_machines" {
   dynamic "secret" {
     for_each = each.value.secret != null ? [each.value.secret] : []
     content {
-      certificate {
-        store = secret.value.certificate.store
-        url   = secret.value.certificate.url
+      dynamic "certificate" {
+        for_each = secret.value.certificate
+        content {
+          store = certificate.value.store
+          url   = certificate.value.url
+        }
       }
       key_vault_id = secret.value.key_vault_id
     }

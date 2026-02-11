@@ -108,13 +108,13 @@ EOT
     os_managed_disk_id                                     = optional(string)
     patch_assessment_mode                                  = optional(string)
     patch_mode                                             = optional(string)
-    platform_fault_domain                                  = optional(number, -1)
-    priority                                               = optional(string, "Regular")
+    platform_fault_domain                                  = optional(number) # Default: -1
+    priority                                               = optional(string) # Default: "Regular"
     provision_vm_agent                                     = optional(bool)
     proximity_placement_group_id                           = optional(string)
     source_image_id                                        = optional(string)
     secure_boot_enabled                                    = optional(bool)
-    max_bid_price                                          = optional(number, -1)
+    max_bid_price                                          = optional(number) # Default: -1
     tags                                                   = optional(map(string))
     timezone                                               = optional(string)
     user_data                                              = optional(string)
@@ -123,13 +123,13 @@ EOT
     reboot_setting                                         = optional(string)
     license_type                                           = optional(string)
     eviction_policy                                        = optional(string)
-    extensions_time_budget                                 = optional(string, "PT1H30M")
+    extensions_time_budget                                 = optional(string) # Default: "PT1H30M"
     admin_password                                         = optional(string)
     admin_username                                         = optional(string)
     allow_extension_operations                             = optional(bool)
     automatic_updates_enabled                              = optional(bool)
     availability_set_id                                    = optional(string)
-    bypass_platform_safety_checks_on_user_schedule_enabled = optional(bool, false)
+    bypass_platform_safety_checks_on_user_schedule_enabled = optional(bool) # Default: false
     capacity_reservation_group_id                          = optional(string)
     hotpatching_enabled                                    = optional(bool)
     computer_name                                          = optional(string)
@@ -146,7 +146,7 @@ EOT
       caching = string
       diff_disk_settings = optional(object({
         option    = string
-        placement = optional(string, "CacheDisk")
+        placement = optional(string) # Default: "CacheDisk"
       }))
       disk_encryption_set_id           = optional(string)
       disk_size_gb                     = optional(number)
@@ -154,11 +154,11 @@ EOT
       secure_vm_disk_encryption_set_id = optional(string)
       security_encryption_type         = optional(string)
       storage_account_type             = optional(string)
-      write_accelerator_enabled        = optional(bool, false)
+      write_accelerator_enabled        = optional(bool) # Default: false
     })
     additional_capabilities = optional(object({
-      hibernation_enabled = optional(bool, false)
-      ultra_ssd_enabled   = optional(bool, false)
+      hibernation_enabled = optional(bool) # Default: false
+      ultra_ssd_enabled   = optional(bool) # Default: false
     }))
     additional_unattend_content = optional(object({
       content = string
@@ -168,11 +168,11 @@ EOT
       storage_account_uri = optional(string)
     }))
     gallery_application = optional(list(object({
-      automatic_upgrade_enabled                   = optional(bool, false)
+      automatic_upgrade_enabled                   = optional(bool) # Default: false
       configuration_blob_uri                      = optional(string)
-      order                                       = optional(number, 0)
+      order                                       = optional(number) # Default: 0
       tag                                         = optional(string)
-      treat_failure_as_deployment_failure_enabled = optional(bool, false)
+      treat_failure_as_deployment_failure_enabled = optional(bool) # Default: false
       version_id                                  = string
     })))
     identity = optional(object({
@@ -180,7 +180,7 @@ EOT
       type         = string
     }))
     os_image_notification = optional(object({
-      timeout = optional(string, "PT15M")
+      timeout = optional(string) # Default: "PT15M"
     }))
     plan = optional(object({
       name      = string
@@ -188,10 +188,10 @@ EOT
       publisher = string
     }))
     secret = optional(object({
-      certificate = object({
+      certificate = list(object({
         store = string
         url   = string
-      })
+      }))
       key_vault_id = string
     }))
     source_image_reference = optional(object({
@@ -202,7 +202,7 @@ EOT
     }))
     termination_notification = optional(object({
       enabled = bool
-      timeout = optional(string, "PT5M")
+      timeout = optional(string) # Default: "PT5M"
     }))
     winrm_listener = optional(object({
       certificate_url = optional(string)
@@ -216,6 +216,14 @@ EOT
       )
     ])
     error_message = "Each gallery_application list must contain at most 100 items"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.windows_virtual_machines : (
+        length(v.secret.certificate) >= 1
+      )
+    ])
+    error_message = "Each certificate list must contain at least 1 items"
   }
 }
 
